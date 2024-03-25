@@ -1,0 +1,182 @@
+features:
+  css: docassemble.playground1:data/static/custom-styles.css
+---
+metadata:
+  title: |
+    Complex Template
+  short title: |
+    Complex Template - Test
+  description: |
+    No description
+---
+objects:
+  - client: Individual
+  - lawyer: Individual
+  - defendant: Individual
+  - court: Organisation
+---
+mandatory: True
+code: |
+  multi_user = True
+---
+code: |
+  court_name = ''
+  client_name_first = ''
+  client_name_last = ''
+  start_data = None
+  client.name.first = 'Bill'
+  client.name.last = 'Best'
+  client.address = '123 Main Street, Cacak'
+  client.jmbg = '12345'
+  
+  lawyer.name.first = 'Bill'
+  lawyer.name.last = 'Best'
+  lawyer.address = '123 Secondary Street, Belgrade'
+  
+  defendant.name.first = 'Eva'
+  defendant.name.last = 'Smith'
+  defendant.address = '5th Ave, NY'
+  defendant.jmbg = '54321'
+  
+  custody_party = 'Bane Nicovic'
+---
+mandatory: True
+question: |
+  To ${ court_name } ${ start_data }
+fields:
+  - note: ТУЖБА
+  - "ради развода брака": opt_divorce
+    datatype: yesnowide
+  - "вршења родитељског права": opt_parent
+    datatype: yesnowide
+  - "доприноса издржавања": opt_doprinosa
+    datatype: yesnowide
+  - "са привременом мером ": opt_merom
+    datatype: yesnowide
+  - Matter date: case_date
+    datatype: date
+  - "How many underaged children": child_amount
+    datatype: integer
+  - "Children Names": child_names
+  - "Children JMBG": child_jmbg
+  - html: |
+      <hr>
+    show if:
+      variable: opt_divorce
+      is: True
+  - "Date of Marriage": date_marriage
+    datatype: date
+    show if:
+      variable: opt_divorce
+      is: True
+  - "Place of Marriage": place_marriage
+    show if:
+      variable: opt_divorce
+      is: True
+  - "Serial Num of Marriage Cert": cert_marriage
+    show if:
+      variable: opt_divorce
+      is: True
+  - "када је брак почео, до када је трајала заједница, и (опционо) због чега је дошло до развода брака": lawsuit_marriage
+    show if:
+      variable: opt_divorce
+      is: True
+    input type: area
+  - html: |
+      <hr>
+    show if:
+      variable: opt_parent
+      is: True
+  - "Са ким се деца тренутно налазе? Коме доделити вршење родитељског права? Да ли постоји неформални модел виђања са другим родитељем? Интерес детета? Какво је стање након престанка заједнице? Посебне напомене.": lawsuit_child
+    show if:
+      variable: opt_parent
+      is: True
+    input type: area
+  - "Докази који се предлажу у поступку?": lawsuit_child2
+    input type: area
+    show if:
+      variable: opt_parent
+      is: True
+  - "Предложени модел виђања детета са родитељем с којим не живи.": lawsuit_child3
+    input type: area
+    show if:
+      variable: opt_parent
+      is: True
+  - html: |
+      <hr>
+    show if:
+      variable: opt_doprinosa
+      is: True
+  - "Предложени износ на име доприноса обавезног издржавања. Кратко образложити месечне трошкове детета/деце.": lawsuit_doprinosa
+    input type: area
+    show if:
+      variable: opt_doprinosa
+      is: True
+  - "Докази који се предлажу у поступку?": lawsuit_doprinosa2
+    input type: area
+    show if:
+      variable: opt_doprinosa
+      is: True
+  - html: |
+      <hr>
+    show if:
+      variable: opt_merom
+      is: True
+  - "Чињенично стање због ког је оправдано тражити привремену меру.": lawsuit_merom
+    input type: area
+    show if:
+      variable: opt_merom
+      is: True
+  - "Custody Amount": amount_merom
+    show if:
+      variable: opt_merom
+      is: True
+  - "Дете/свако дете": dete_merom
+    input type: dropdown
+    choices: 
+      - дете
+      - свако дете
+    show if:
+      variable: opt_merom
+      is: True
+---
+mandatory: True
+code: |
+  client.name.first = client_name_first
+  client.name.last = client_name_last
+  client.address = client_address
+  client.jmbg = client_jmbg
+  
+  lawyer.name.first = lawyer_name_first
+  lawyer.name.last = lawyer_name_last
+  lawyer.address = lawyer_address
+  
+  defendant.name.first = defendant_name_first
+  defendant.name.last = defendant_name_last
+  defendant.address = defendant_address
+  defendant.jmbg = defendant_jmbg
+  
+  matterId = matter_id
+  workItemId = work_item_id
+  fileName = filename
+  
+  custody_party = ''
+---
+mandatory: True
+question: Here is your document.
+attachment:
+  - name: Summary of Benefits
+    # filename: benefits_summary
+    file: fam_file
+    variable name: doc_file
+    docx template file: dissolution-of-marriage-divorce-decree-serbian.docx
+    valid formats:
+      - docx
+buttons:
+  - Save & Exit: continue
+---
+mandatory: True
+code: |
+  doc_path = doc_file.path()
+  bucket_name = 'smart-docx-preview'
+  command('leave', url='https://smart-docx.com/assets/redirect.html?matterId=' + matterId)
